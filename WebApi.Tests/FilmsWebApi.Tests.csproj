@@ -15,7 +15,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WebApi\WebApi.csproj" />
+    <ProjectReference Include="..\FilmsWebApi.Model\FilmsWebApi.Model.csproj" />
+    <ProjectReference Include="..\FilmsWebApi.Services\FilmsWebApi.Service.csproj" />
+    <ProjectReference Include="..\WebApi\FilmsWebApi.csproj" />
   </ItemGroup>
 
 </Project>

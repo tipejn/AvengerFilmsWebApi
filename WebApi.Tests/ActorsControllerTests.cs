@@ -1,46 +1,46 @@
 using NUnit.Framework;
-using WebApi.Data;
+using FilmsWebApi.Data;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using WebApi.Controllers;
+using FilmsWebApi.Controllers;
 using System;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
-using WebApi.Model;
+using FilmsWebApi.Model;
 using Microsoft.AspNetCore.Mvc;
 
-namespace WebApi.Tests
+namespace FilmsWebApi.Tests
 {
     public class Tests
     {
         [Test]
-        public async Task CanGetActors()
+        public void CanGetActors()
         {
             var context = GetFilmContextMock();
 
             var target = new ActorsController(context);
-            var actors = await target.GetActors();
+            var actors = target.GetActors();
 
-            Assert.That(actors.Value, Has.Exactly(2).Items);
+            Assert.That(actors, Has.Exactly(2).Items);
         }
         [Test]
-        public async Task CanGetActorsWithFilms()
+        public void CanGetActorsWithFilms()
         {
             var context = GetFilmContextMock();
 
             var target = new ActorsController(context);
-            var actors = await target.GetActorsWithFilms();
+            var actors = target.GetActorsWithFilms();
 
-            Assert.That(actors.Value, Has.All.Property("Films").Count.GreaterThan(0));
+            Assert.That(actors, Has.All.Property("Films").Count.GreaterThan(0));
         }
 
         [Test]
-        public async Task CanGetSingleActorWithoutFilms()
+        public void CanGetSingleActorWithoutFilms()
         {
             var context = GetFilmContextMock();
 
             var target = new ActorsController(context);
-            var actor = await target.GetActor(1);
+            var actor = target.GetActor(1);
 
             Assert.That(actor.Value, 
                 Has.Property("FirstName").EqualTo("Robert")
@@ -49,12 +49,12 @@ namespace WebApi.Tests
         }
 
         [Test]
-        public async Task CanGetSingleActorWithFilms()
+        public void CanGetSingleActorWithFilms()
         {
             var context = GetFilmContextMock();
 
             var target = new ActorsController(context);
-            var actor = await target.GetActorWithFilms(2);
+            var actor = target.GetActorWithFilms(2);
 
             Assert.That(actor.Value, 
                 Has.Property("LastName").EqualTo("Johanson")
@@ -63,14 +63,14 @@ namespace WebApi.Tests
         }
 
         [Test]
-        public async Task CanAddActor()
+        public void CanAddActor()
         {
             var actor = new Actor() { FirstName = "Chris", LastName = "Evans" };
 
             var context = GetFilmContextMock();
             var target = new ActorsController(context);
 
-            await target.PostActor(actor);
+            target.PostActor(actor);
             var actors = context.Actors.ToList();
 
             Assert.That(actors, Has.Exactly(1).Matches<Actor>(
@@ -78,7 +78,7 @@ namespace WebApi.Tests
         }
 
         [Test]
-        public async Task CanAddActorWithNewFilm()
+        public void CanAddActorWithNewFilm()
         {
             var actor = new Actor() { FirstName = "Chris", LastName = "Evans" };
             actor.ActorFilms.Add(new ActorFilm()
@@ -94,7 +94,7 @@ namespace WebApi.Tests
             var context = GetFilmContextMock();
             var target = new ActorsController(context);
 
-            await target.PostActor(actor);
+            target.PostActor(actor);
             var resultActor = context.Actors
                 .FirstOrDefault(a => a.FirstName == actor.FirstName && a.LastName == actor.LastName);
 
@@ -105,7 +105,7 @@ namespace WebApi.Tests
         }
 
         [Test]
-        public async Task CanAddActorToExistingFilm()
+        public void CanAddActorToExistingFilm()
         {
             var actor = new Actor() { FirstName = "Chris", LastName = "Evans" };
             var filmId = 2;
@@ -114,7 +114,7 @@ namespace WebApi.Tests
             var context = GetFilmContextMock();
             var target = new ActorsController(context);
 
-            await target.PostActor(actor);
+            target.PostActor(actor);
             var resultActor = context.Actors
                 .FirstOrDefault(a => a.FirstName == actor.FirstName && a.LastName == actor.LastName);
 
@@ -126,7 +126,7 @@ namespace WebApi.Tests
         }
 
         [Test]
-        public async Task CanUpdateActor()
+        public void CanUpdateActor()
         {
             var id = 1;
             var newLastName = "Downey Junior";
@@ -135,7 +135,7 @@ namespace WebApi.Tests
             var context = GetFilmContextMock();
             var target = new ActorsController(context);
 
-            await target.PutActor(id, actor);
+            target.PutActor(id, actor);
             var resultActor = context.Actors
                 .FirstOrDefault(a => a.Id == id);
 
@@ -143,13 +143,13 @@ namespace WebApi.Tests
         }
 
         [Test]
-        public async Task CanDeleteActor()
+        public void CanDeleteActor()
         {
             var id = 1;
             var context = GetFilmContextMock();
             var target = new ActorsController(context);
             
-            await target.DeleteActor(id);
+            target.DeleteActor(id);
 
             var actors = context.Actors.ToList();
 
@@ -157,11 +157,11 @@ namespace WebApi.Tests
         }
 
         [Test]
-        public async Task CannotFindNonexistentActor()
+        public void CannotFindNonexistentActor()
         {
             var context = GetFilmContextMock();
             var target = new ActorsController(context);
-            var result = await target.GetActor(44);
+            var result = target.GetActor(44);
 
             Assert.That(result.Result, Is.TypeOf<NotFoundResult>());
         }

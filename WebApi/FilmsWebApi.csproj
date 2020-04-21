@@ -16,5 +16,10 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\FilmsWebApi.Model\FilmsWebApi.Model.csproj" />
+    <ProjectReference Include="..\FilmsWebApi.Services\FilmsWebApi.Service.csproj" />
+  </ItemGroup>
+
 
 </Project>

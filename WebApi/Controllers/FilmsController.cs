@@ -5,10 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using WebApi;
-using WebApi.Data;
+using FilmsWebApi;
+using FilmsWebApi.Data;
+using FilmsWebApi.Model;
 
-namespace WebApi.Controllers
+namespace FilmsWebApi.Controllers
 {
     [Route("[controller]")]
     [ApiController]

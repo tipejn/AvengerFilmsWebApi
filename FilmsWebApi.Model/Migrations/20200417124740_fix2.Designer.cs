@@ -5,13 +5,13 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using WebApi.Data;
+using FilmsWebApi.Data;
 
-namespace WebApi.Migrations
+namespace FilmsWebApi.Migrations
 {
     [DbContext(typeof(FilmContext))]
-    [Migration("20200417121527_fix1")]
-    partial class fix1
+    [Migration("20200417124740_fix2")]
+    partial class fix2
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -75,7 +75,7 @@ namespace WebApi.Migrations
             modelBuilder.Entity("WebApi.Model.ActorFilm", b =>
                 {
                     b.HasOne("WebApi.Actor", "Actor")
-                        .WithMany("Films")
+                        .WithMany("ActorFilms")
                         .HasForeignKey("ActorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

@@ -1,11 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using WebApi.Model;
+﻿using FilmsWebApi.Model;
+using Microsoft.EntityFrameworkCore;
 
-namespace WebApi.Data
+namespace FilmsWebApi.Data
 {
     public class FilmContext : DbContext
     {

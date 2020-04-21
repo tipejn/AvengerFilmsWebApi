@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace WebApi.Migrations
+namespace FilmsWebApi.Migrations
 {
     public partial class fix1 : Migration
     {

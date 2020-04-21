@@ -3,9 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29728.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi", "WebApi.csproj", "{B9C8FFCC-2C88-4492-930C-F67AAEDDCA0D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FilmsWebApi", "FilmsWebApi.csproj", "{B9C8FFCC-2C88-4492-930C-F67AAEDDCA0D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi.Tests", "..\WebApi.Tests\WebApi.Tests.csproj", "{05E44018-4398-4C12-BEA0-011ACA3CFF36}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FilmsWebApi.Tests", "..\WebApi.Tests\FilmsWebApi.Tests.csproj", "{05E44018-4398-4C12-BEA0-011ACA3CFF36}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilmsWebApi.Service", "..\FilmsWebApi.Services\FilmsWebApi.Service.csproj", "{D1CC0509-60BE-4552-8D2D-CF2782222C80}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilmsWebApi.Model", "..\FilmsWebApi.Model\FilmsWebApi.Model.csproj", "{0E472738-933D-4005-AEAF-5F1B36E1A214}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +25,14 @@ Global
 		{05E44018-4398-4C12-BEA0-011ACA3CFF36}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{05E44018-4398-4C12-BEA0-011ACA3CFF36}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{05E44018-4398-4C12-BEA0-011ACA3CFF36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1CC0509-60BE-4552-8D2D-CF2782222C80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1CC0509-60BE-4552-8D2D-CF2782222C80}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1CC0509-60BE-4552-8D2D-CF2782222C80}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1CC0509-60BE-4552-8D2D-CF2782222C80}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E472738-933D-4005-AEAF-5F1B36E1A214}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E472738-933D-4005-AEAF-5F1B36E1A214}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E472738-933D-4005-AEAF-5F1B36E1A214}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E472738-933D-4005-AEAF-5F1B36E1A214}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
