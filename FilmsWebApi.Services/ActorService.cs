@@ -19,16 +19,24 @@ namespace FilmsWebApi.Service
 
         public void AddActor(Actor actor)
         {
-            EnsureHasFilms(actor);
+            if (actor == null)
+            {
+                throw new ArgumentNullException();
+            }
 
+            EnsureHasFilms(actor);
             _context.Actors.Add(actor);
             _context.SaveChanges();
         }
 
         public void DeleteActor(Actor actor)
         {
+            if (actor == null)
+            {
+                throw new ArgumentNullException();
+            }
             _context.Actors.Remove(actor);
-            _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
 
         public Actor GetActor(int id)
@@ -59,8 +67,12 @@ namespace FilmsWebApi.Service
 
         public void UpdateActor(Actor actor)
         {
-            EnsureHasFilms(actor);
+            if (actor == null)
+            {
+                throw new ArgumentNullException();
+            }
 
+            EnsureHasFilms(actor);
             _context.Entry(actor).State = EntityState.Modified;
             _context.SaveChanges();
         }
@@ -74,7 +86,7 @@ namespace FilmsWebApi.Service
             {
                 if (actorFilm.FilmId != 0)
                 {
-                    actorFilm.Film = _context.Films.FirstOrDefault(f => f.Id == actorFilm.FilmId);
+                    actorFilm.Film = _context.Films.Single(f => f.Id == actorFilm.FilmId);
                 }
             }
         }

@@ -12,6 +12,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using FilmsWebApi.Data;
 using Microsoft.EntityFrameworkCore;
+using FilmsWebApi.Service;
 
 namespace FilmsWebApi
 {
@@ -29,6 +30,7 @@ namespace FilmsWebApi
         {
             services.AddDbContext<FilmContext>(
                 options => options.UseSqlServer(Configuration.GetConnectionString("FilmConnection")));
+            services.AddTransient<IActorService, ActorService>();
             services.AddControllers().AddNewtonsoftJson(a => a.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
         }

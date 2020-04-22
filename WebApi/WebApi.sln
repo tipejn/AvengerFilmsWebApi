@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilmsWebApi.Service", "..\F
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilmsWebApi.Model", "..\FilmsWebApi.Model\FilmsWebApi.Model.csproj", "{0E472738-933D-4005-AEAF-5F1B36E1A214}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilmsWebApi.Data", "..\FilmsWebApi.Data\FilmsWebApi.Data.csproj", "{A6F88EF5-F7C5-479E-853F-20C79E2039E7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{0E472738-933D-4005-AEAF-5F1B36E1A214}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0E472738-933D-4005-AEAF-5F1B36E1A214}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0E472738-933D-4005-AEAF-5F1B36E1A214}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6F88EF5-F7C5-479E-853F-20C79E2039E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6F88EF5-F7C5-479E-853F-20C79E2039E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6F88EF5-F7C5-479E-853F-20C79E2039E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6F88EF5-F7C5-479E-853F-20C79E2039E7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

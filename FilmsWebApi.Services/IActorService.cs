@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FilmsWebApi.Service
 {
-    interface IActorService
+    public interface IActorService
     {
         IEnumerable<Actor> GetAllActors();
         IEnumerable<Actor> GetAllActorsWithFilms();

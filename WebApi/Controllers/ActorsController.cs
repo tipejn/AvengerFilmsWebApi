@@ -13,13 +13,11 @@ namespace FilmsWebApi.Controllers
     [ApiController]
     public class ActorsController : ControllerBase
     {
-        private readonly FilmContext _context;
-        private readonly ActorService _service;
+        private readonly IActorService _service;
 
-        public ActorsController(FilmContext context)
+        public ActorsController(IActorService service)
         {
-            _context = context;
-            _service = new ActorService(context);
+            _service = service;
         }
 
         // GET: Actors
@@ -52,7 +50,7 @@ namespace FilmsWebApi.Controllers
         }
 
         // GET: Actors/5/Films
-        [HttpGet("{id}/Films")]
+        [HttpGet("{id}/films")]
         public ActionResult<Actor> GetActorWithFilms(int id)
         {
             var actor = _service.GetActorWithFilms(id);
