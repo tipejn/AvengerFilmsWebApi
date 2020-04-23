@@ -84,10 +84,7 @@ namespace FilmsWebApi.Service
         {
             foreach (var actorFilm in actor.ActorFilms)
             {
-                if (actorFilm.FilmId != 0)
-                {
-                    actorFilm.Film = _context.Films.Single(f => f.Id == actorFilm.FilmId);
-                }
+                actorFilm.Film = _context.Films.Single(f => f.Id == actorFilm.Film.Id);
             }
         }
     }
