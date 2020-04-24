@@ -1,334 +1,250 @@
-using FilmsWebApi.Data;
 using FilmsWebApi.Controllers;
 using FilmsWebApi.Model;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using FilmsWebApi.Service;
 using Microsoft.AspNetCore.Mvc;
+using Moq;
+using NUnit.Framework;
+using System;
+using System.Linq;
 
 namespace FilmsWebApi.Tests
 {
     public class ActorControllerTests
     {
-        private DbContextOptions<FilmContext> _options;
-
-        [SetUp]
-        public void Setup()
-        {
-            var provider = new ServiceCollection()
-                .AddEntityFrameworkInMemoryDatabase()
-                .BuildServiceProvider();
-
-            _options = new DbContextOptionsBuilder<FilmContext>()
-                .UseInMemoryDatabase("FilmDb")
-                .UseInternalServiceProvider(provider)
-                .Options;
-
-            using (var context = GetContext())
-            {
-                var helper = new ActorTestFilmContextHelper(context);
-                helper.SeedContext();
-                helper.ResetEntities();
-            }
-        }
-
         [Test]
         public void CanGetAllActorsWithoutFilms()
         {
-            using (var context = GetContext())
-            {
-                var service = new ActorService(context);
-                var controller = new ActorsController(service);
-                var actors = controller.GetActors();
+            var mock = new Mock<IActorService>();
+            mock.Setup(m => m.GetAllActors()).Returns(ActorTestData.NewActors);
 
-                Assert.That(actors,
-                    Has.Count.EqualTo(2)
-                    .And.All.Property("Films").Empty);
-            }
+            var controller = new ActorsController(mock.Object);
+            var actors = controller.GetActors();
+
+            mock.Verify(m => m.GetAllActors(), Times.Once);
+
+            Assert.That(actors, Has.Count.EqualTo(ActorTestData.NewActors.Count()));
         }
 
         [Test]
         public void CanGetAllActorsWithFilms()
         {
-            using (var context = GetContext())
-            {
-                var service = new ActorService(context);
-                var controller = new ActorsController(service);
-                var actors = controller.GetActorsWithFilms();
+            var mock = new Mock<IActorService>();
+            mock.Setup(m => m.GetAllActorsWithFilms()).Returns(ActorTestData.ExistingActors);
 
-                Assert.That(actors, Has.Some.Property("Films").Not.Empty);
-            }
+            var controller = new ActorsController(mock.Object);
+            var actors = controller.GetActorsWithFilms();
+
+            mock.Verify(m => m.GetAllActorsWithFilms(), Times.Once);
+
+            Assert.That(actors, Has.Count.EqualTo(ActorTestData.ExistingActors.Count()));
         }
 
         [Test]
-        [TestCaseSource(typeof(ActorTestData), "ExistingActors")]
+        [TestCaseSource(typeof(ActorTestData), "NewActors")]
         public void CanGetSingleActorWithoutFilms(Actor source)
         {
-            using (var context = GetContext())
-            {
-                var service = new ActorService(context);
-                var controller = new ActorsController(service);
-                var actor = controller.GetActor(source.Id);
+            var mock = new Mock<IActorService>();
+            mock.Setup(m => m.GetActor(source.Id)).Returns(source);
 
-                Assert.That(actor.Value,
-                    Is.Not.Null
-                    .And.Property("Films").Empty
-                    .And.Property("FirstName").EqualTo(source.FirstName)
-                    .And.Property("LastName").EqualTo(source.LastName));
-            }
+            var controller = new ActorsController(mock.Object);
+            var response = controller.GetActor(source.Id);
+
+            mock.Verify(m => m.GetActor(source.Id), Times.Once);
+
+            Assert.That(response, Has.Property("Value").Not.Null);
         }
 
         [Test]
         [TestCaseSource(typeof(ActorTestData), "ExistingActors")]
         public void CanGetSingleActorWithFilms(Actor source)
         {
-            using (var context = GetContext())
-            {
-                var service = new ActorService(context);
-                var controller = new ActorsController(service);
-                var actor = controller.GetActorWithFilms(source.Id);
+            var mock = new Mock<IActorService>();
+            mock.Setup(m => m.GetActorWithFilms(source.Id)).Returns(source);
 
-                Assert.That(actor.Value,
-                    Is.Not.Null
-                    .And.Property("Films").Not.Empty
-                    .And.Property("FirstName").EqualTo(source.FirstName)
-                    .And.Property("LastName").EqualTo(source.LastName));
-            }
+            var controller = new ActorsController(mock.Object);
+            var response = controller.GetActorWithFilms(source.Id);
+
+            mock.Verify(m => m.GetActorWithFilms(source.Id), Times.Once);
+
+            Assert.That(response, Has.Property("Value").Not.Null);
         }
 
         [Test]
         public void CannotGetNonexistentActorWithoutFilms()
         {
-            using (var context = GetContext())
-            {
-                var service = new ActorService(context);
-                var controller = new ActorsController(service);
-                var actor = controller.GetActor(44);
+            var mock = new Mock<IActorService>();
+            mock.Setup(m => m.GetActor(44)).Returns(null as Actor);
 
-                Assert.That(actor.Value, Is.Null);
-            }
+            var controller = new ActorsController(mock.Object);
+            var response = controller.GetActor(44);
+
+            mock.Verify(m => m.GetActor(44), Times.Once);
+
+            Assert.That(response, 
+                Has.Property("Result").TypeOf<NotFoundResult>()
+                .And.Property("Value").Null);
         }
 
         [Test]
         public void CannotGetNonexistentActorWithFilms()
         {
-            using (var context = GetContext())
-            {
-                var service = new ActorService(context);
-                var controller = new ActorsController(service);
-                var actor = controller.GetActorWithFilms(44);
+            var mock = new Mock<IActorService>();
+            mock.Setup(m => m.GetActorWithFilms(44)).Returns(null as Actor);
 
-                Assert.That(actor.Value, Is.Null);
-            }
+            var controller = new ActorsController(mock.Object);
+            var response = controller.GetActorWithFilms(44);
+
+            mock.Verify(m => m.GetActorWithFilms(44), Times.Once);
+
+            Assert.That(response,
+                Has.Property("Result").TypeOf<NotFoundResult>()
+                .And.Property("Value").Null);
         }
 
         [Test]
         [TestCaseSource(typeof(ActorTestData), "NewActors")]
-        public void CanAddActorWithoutAnyFilm(Actor source)
+        public void CanAddActor(Actor source)
         {
-            using (var context = GetContext())
-            {
-                var service = new ActorService(context);
-                var controller = new ActorsController(service);
-                controller.PostActor(source);
-            }
+            var mock = new Mock<IActorService>();
+            mock.Setup(m => m.ActorExists(source.Id)).Returns(false);
 
-            using (var context = GetContext())
-            {
-                var service = new ActorService(context);
-                var controller = new ActorsController(service);
-                var actor = controller.GetActorWithFilms(source.Id);
-                Assert.That(actor.Value,
-                    Is.Not.Null
-                    .And.Property("FirstName").EqualTo(source.FirstName)
-                    .And.Property("LastName").EqualTo(source.LastName)
-                    .And.Property("Films").Empty);
-            }
-        }
+            var controller = new ActorsController(mock.Object);
+            var response = controller.PostActor(source);
 
-        [Test]
-        [TestCaseSource(typeof(ActorTestData), "NewActorWithExistingFilms")]
-        public void CanAddActorToExistingFilm(Actor source)
-        {
-            using (var context = GetContext())
-            {
-                var service = new ActorService(context);
-                var controller = new ActorsController(service);
-                var actor = controller.PostActor(source);
-            }
+            mock.Verify(m => m.AddActor(source), Times.Once);
 
-            using (var context = GetContext())
-            {
-                var service = new ActorService(context);
-                var controller = new ActorsController(service);
-                var actor = controller.GetActorWithFilms(source.Id);
-                Assert.That(actor.Value.Films, new ContainsAllFilmTitlesConstraint(source.Films));
-            }
+            Assert.That(response, Has.Property("Result").TypeOf<CreatedAtActionResult>());
         }
 
         [Test]
         [TestCaseSource(typeof(ActorTestData), "NewActorWithNonexistingFilms")]
-        public void CannotAddActorToNonexistentFilm(Actor source)
+        public void CanCatchExceptionWhenAddingActorToNonExistingFilm(Actor source)
         {
-            using (var context = GetContext())
-            {
-                var service = new ActorService(context);
-                var controller = new ActorsController(service);
-                var response = controller.PostActor(source);
+            var mock = new Mock<IActorService>();
+            mock.Setup(m => m.AddActor(source)).Throws(new InvalidOperationException());
 
-                Assert.That(response.Result, Is.TypeOf<BadRequestResult>());
-            }
+            var controller = new ActorsController(mock.Object);
+            var response = controller.PostActor(source);
+
+            mock.Verify(m => m.AddActor(source), Times.Once);
+
+            Assert.That(response, Has.Property("Result").TypeOf<BadRequestResult>());
         }
 
         [Test]
         [TestCaseSource(typeof(ActorTestData), "BrokenActors")]
         public void CannotAddActorWithExistingId(Actor source)
         {
-            using (var context = GetContext())
-            {
-                var service = new ActorService(context);
-                var controller = new ActorsController(service);
+            var mock = new Mock<IActorService>();
+            mock.Setup(m => m.ActorExists(source.Id)).Returns(true);
 
-                var response = controller.PostActor(source);
+            var controller = new ActorsController(mock.Object);
+            var response = controller.PostActor(source);
 
-                Assert.That(response.Result, Is.TypeOf<BadRequestResult>());
-            }
+            mock.Verify(m => m.AddActor(It.IsAny<Actor>()), Times.Never);
 
+            Assert.That(response, Has.Property("Result").TypeOf<BadRequestResult>());
         }
 
         [Test]
         public void CannotAddNull()
         {
-            using (var context = GetContext())
-            {
-                var service = new ActorService(context);
-                var controller = new ActorsController(service);
+            var mock = new Mock<IActorService>();
+            var controller = new ActorsController(mock.Object);
 
-                var response = controller.PostActor(null);
+            var response = controller.PostActor(null);
 
-                Assert.That(response.Result, Is.TypeOf<BadRequestResult>());
-            }
+            mock.Verify(m => m.AddActor(It.IsAny<Actor>()), Times.Never);
+
+            Assert.That(response, Has.Property("Result").TypeOf<BadRequestResult>());
         }
 
         [Test]
         [TestCaseSource(typeof(ActorTestData), "UpdatedActors")]
         public void CanUpdateActor(Actor source)
         {
-            using (var context = GetContext())
-            {
-                var service = new ActorService(context);
-                var controller = new ActorsController(service);
-                controller.PutActor(source.Id, source);
-            }
+            var mock = new Mock<IActorService>();
+            mock.Setup(m => m.ActorExists(source.Id)).Returns(true);
 
-            using (var context = GetContext())
-            {
-                var service = new ActorService(context);
-                var controller = new ActorsController(service);
-                var actor = controller.GetActor(source.Id);
-                Assert.That(actor.Value,
-                    Has.Property("LastName").EqualTo(source.LastName)
-                    .And.Property("FirstName").EqualTo(source.FirstName));
-            }
-        }
+            var controller = new ActorsController(mock.Object);
+            var response = controller.PutActor(source.Id, source);
 
-        [Test]
-        [TestCaseSource(typeof(ActorTestData), "ExistingActors")]
-        public void CanRemoveFilmFromActor(Actor source)
-        {
-            var filmToDelete = source.Films.First();
+            mock.Verify(m => m.UpdateActor(source), Times.Once);
 
-            using (var context = GetContext())
-            {
-                var service = new ActorService(context);
-                var actor = service.GetActorWithFilms(source.Id);
-                var actorfilm = actor.ActorFilms.Single(f => f.Film.Id == filmToDelete.Id);
-                actor.ActorFilms.Remove(actorfilm);
-                var controller = new ActorsController(service);
-                controller.PutActor(actor.Id, actor);
-            }
-
-            using (var context = GetContext())
-            {
-                var service = new ActorService(context);
-                var controller = new ActorsController(service);
-                var actor = controller.GetActorWithFilms(source.Id);
-                Assert.That(actor.Value.Films,
-                    Has.Exactly(source.Films.Count - 1).Items
-                    .And.Exactly(0).Matches<Film>(f => f.Id == filmToDelete.Id));
-            }
+            Assert.That(response, Is.TypeOf<NoContentResult>());
         }
 
         [Test]
         [TestCaseSource(typeof(ActorTestData), "NewActors")]
         public void CannotUpdateNonexistentActor(Actor source)
         {
-            using (var context = GetContext())
-            {
-                var service = new ActorService(context);
-                var controller = new ActorsController(service);
-                var response = controller.PutActor(source.Id, source);
+            var mock = new Mock<IActorService>();
+            mock.Setup(m => m.ActorExists(source.Id)).Returns(false);
 
-                Assert.That(response, Is.TypeOf<NotFoundResult>());
-            }
+            var controller = new ActorsController(mock.Object);
+            var response = controller.PutActor(source.Id, source);
+
+            mock.Verify(m => m.UpdateActor(It.IsAny<Actor>()), Times.Never);
+
+            Assert.That(response, Is.TypeOf<NotFoundResult>());
         }
 
         [Test]
         public void CannotUpdateNull()
         {
-            using (var context = GetContext())
-            {
-                var service = new ActorService(context);
-                var controller = new ActorsController(service);
-                var response = controller.PutActor(0, null);
+            var mock = new Mock<IActorService>();
 
-                Assert.That(response, Is.TypeOf<BadRequestResult>());
-            }
+            var controller = new ActorsController(mock.Object);
+            var response = controller.PutActor(0, null);
+
+            mock.Verify(m => m.UpdateActor(It.IsAny<Actor>()), Times.Never);
+
+            Assert.That(response, Is.TypeOf<BadRequestResult>());
+        }
+
+
+        [Test]
+        [TestCaseSource(typeof(ActorTestData), "NewActors")]
+        public void CannotUpdateWhenBrokenId(Actor source)
+        {
+            var mock = new Mock<IActorService>();
+
+            var controller = new ActorsController(mock.Object);
+            var response = controller.PutActor(0, source);
+
+            mock.Verify(m => m.UpdateActor(It.IsAny<Actor>()), Times.Never);
+
+            Assert.That(response, Is.TypeOf<BadRequestResult>());
         }
 
         [Test]
         [TestCaseSource(typeof(ActorTestData), "ExistingActors")]
         public void CanDeleteActor(Actor source)
         {
-            using (var context = GetContext())
-            {
-                var service = new ActorService(context);
-                var actor = service.GetActor(source.Id);
-                var controller = new ActorsController(service);
-                controller.DeleteActor(actor.Id);
-            }
+            var mock = new Mock<IActorService>();
+            mock.Setup(m => m.GetActor(source.Id)).Returns(source);
 
-            using (var context = GetContext())
-            {
-                var service = new ActorService(context);
-                var controller = new ActorsController(service);
-                var actor = controller.GetActor(source.Id);
-                Assert.That(actor.Value, Is.Null);
-            }
+            var controller = new ActorsController(mock.Object);
+            var response = controller.DeleteActor(source.Id);
+
+            mock.Verify(m => m.DeleteActor(source), Times.Once);
+
+            Assert.That(response, Has.Property("Result").TypeOf<NoContentResult>());
         }
 
         [Test]
         [TestCaseSource(typeof(ActorTestData), "NewActors")]
         public void CannotDeleteNonexistentActor(Actor source)
         {
-            using (var context = GetContext())
-            {
-                var service = new ActorService(context);
-                var controller = new ActorsController(service);
-                var response = controller.DeleteActor(source.Id);
+            var mock = new Mock<IActorService>();
+            mock.Setup(m => m.GetActor(source.Id)).Returns(null as Actor);
 
-                Assert.That(response.Result, Is.TypeOf<NotFoundResult>());
-            }
-        }
+            var controller = new ActorsController(mock.Object);
+            var response = controller.DeleteActor(source.Id);
 
-        private FilmContext GetContext()
-        {
-            return new FilmContext(_options);
+            mock.Verify(m => m.DeleteActor(It.IsAny<Actor>()), Times.Never);
+
+            Assert.That(response, Has.Property("Result").TypeOf<NotFoundResult>());
         }
     }
 }

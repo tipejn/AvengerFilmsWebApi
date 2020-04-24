@@ -117,7 +117,7 @@ namespace FilmsWebApi.Controllers
 
             _service.DeleteActor(actor);
 
-            return actor;
+            return NoContent();
         }
 
     }
