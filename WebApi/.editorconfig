@@ -1,0 +1,13 @@
+﻿[*.cs]
+
+# IDE0063: Use simple 'using' statement
+csharp_prefer_simple_using_statement = false:none
+
+# IDE0008: Use explicit type
+csharp_style_var_elsewhere = true:none
+
+# IDE0008: Use explicit type
+csharp_style_var_for_built_in_types = false:none
+
+# IDE0008: Use explicit type
+csharp_style_var_when_type_is_apparent = false:none

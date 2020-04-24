@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using FilmsWebApi.Data;
 using FilmsWebApi.Model;
 using FilmsWebApi.Service;
+using System;
 
 namespace FilmsWebApi.Controllers
 {
@@ -41,7 +42,7 @@ namespace FilmsWebApi.Controllers
         {
             var actor = _service.GetActor(id);
              
-            if (actor == null)
+            if (actor is null)
             {
                 return NotFound();
             }
@@ -55,7 +56,7 @@ namespace FilmsWebApi.Controllers
         {
             var actor = _service.GetActorWithFilms(id);
 
-            if (actor == null)
+            if (actor is null)
             {
                 return NotFound();
             }
@@ -67,7 +68,7 @@ namespace FilmsWebApi.Controllers
         [HttpPut("{id}")]
         public IActionResult PutActor(int id, Actor actor)
         {
-            if (id != actor.Id)
+            if (actor is null || id != actor.Id)
             {
                 return BadRequest();
             }
@@ -86,12 +87,19 @@ namespace FilmsWebApi.Controllers
         [HttpPost]
         public ActionResult<Actor> PostActor(Actor actor)
         {
-            if (_service.ActorExists(actor.Id))
+            if (actor is null || _service.ActorExists(actor.Id))
             {
                 return BadRequest();
             }
 
-            _service.AddActor(actor);
+            try
+            {
+                _service.AddActor(actor);
+            }
+            catch (InvalidOperationException)
+            {
+                return BadRequest();
+            }
 
             return CreatedAtAction("GetActor", new { id = actor.Id }, actor);
         }
@@ -102,7 +110,7 @@ namespace FilmsWebApi.Controllers
         {
             var actor = _service.GetActor(id);
 
-            if (actor == null)
+            if (actor is null)
             {
                 return NotFound();
             }

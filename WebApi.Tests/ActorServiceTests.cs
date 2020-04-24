@@ -7,14 +7,12 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace FilmsWebApi.Tests
 {
     public class ActorServiceTests
     {
         private DbContextOptions<FilmContext> _options;
-        private FilmContext _context;
 
         [SetUp]
         public void Setup()
@@ -28,18 +26,19 @@ namespace FilmsWebApi.Tests
                 .UseInternalServiceProvider(provider)
                 .Options;
 
-            _context = new FilmContext(_options);
-
-            Seed(_context);
-            ResetEntities(_context);
+            using (var context = GetContext())
+            {
+                Seed(context);
+                ResetEntities(context);
+            }
         }
 
         [Test]
         public void CanGetAllActorsWithoutFilms()
         {
-            using (_context)
+            using (var context = GetContext())
             {
-                var service = new ActorService(_context);
+                var service = new ActorService(context);
                 var actors = service.GetAllActors();
 
                 Assert.That(actors,
@@ -51,9 +50,9 @@ namespace FilmsWebApi.Tests
         [Test]
         public void CanGetAllActorsWithFilms()
         {
-            using (_context)
+            using (var context = GetContext())
             {
-                var service = new ActorService(_context);
+                var service = new ActorService(context);
                 var actors = service.GetAllActorsWithFilms();
 
                 Assert.That(actors, Has.Some.Property("Films").Not.Empty);
@@ -64,9 +63,9 @@ namespace FilmsWebApi.Tests
         [TestCaseSource(typeof(ActorServiceTestData), "ExistingActors")]
         public void CanGetSingleActorWithoutFilms(Actor source)
         {
-            using (_context)
+            using (var context = GetContext())
             {
-                var service = new ActorService(_context);
+                var service = new ActorService(context);
                 var actor = service.GetActor(source.Id);
 
                 Assert.That(actor,
@@ -81,9 +80,9 @@ namespace FilmsWebApi.Tests
         [TestCaseSource(typeof(ActorServiceTestData), "ExistingActors")]
         public void CanGetSingleActorWithFilms(Actor source)
         {
-            using (_context)
+            using (var context = GetContext())
             {
-                var service = new ActorService(_context);
+                var service = new ActorService(context);
                 var actor = service.GetActorWithFilms(source.Id);
 
                 Assert.That(actor,
@@ -97,9 +96,9 @@ namespace FilmsWebApi.Tests
         [Test]
         public void CannotGetNonexistentActorWithoutFilms()
         {
-            using(_context)
+            using(var context = GetContext())
             {
-                var service = new ActorService(_context);
+                var service = new ActorService(context);
                 var actor = service.GetActor(44);
 
                 Assert.That(actor, Is.Null);
@@ -109,9 +108,9 @@ namespace FilmsWebApi.Tests
         [Test]
         public void CannotGetNonexistentActorWithFilms()
         {
-            using (_context)
+            using (var context = GetContext())
             {
-                var service = new ActorService(_context);
+                var service = new ActorService(context);
                 var actor = service.GetActorWithFilms(44);
 
                 Assert.That(actor, Is.Null);
@@ -122,13 +121,13 @@ namespace FilmsWebApi.Tests
         [TestCaseSource(typeof(ActorServiceTestData), "NewActors")]
         public void CanAddActorWithoutAnyFilm(Actor source)
         {
-            using(_context)
+            using(var context = GetContext())
             {
-                var service = new ActorService(_context);
+                var service = new ActorService(context);
                 service.AddActor(source);
             }
 
-            using (var context = new FilmContext(_options))
+            using (var context = GetContext())
             {
                 var service = new ActorService(context);
                 var actor = service.GetActorWithFilms(source.Id);
@@ -143,13 +142,13 @@ namespace FilmsWebApi.Tests
         [TestCaseSource(typeof(ActorServiceTestData), "NewActorWithExistingFilms")]
         public void CanAddActorToExistingFilm(Actor source)
         {
-            using(_context) 
+            using(var context = GetContext()) 
             {
-                var service = new ActorService(_context);
+                var service = new ActorService(context);
                 service.AddActor(source);
             }
 
-            using (var context = new FilmContext(_options))
+            using (var context = GetContext())
             {
                 var service = new ActorService(context);
                 var actor = service.GetActorWithFilms(source.Id);
@@ -161,9 +160,9 @@ namespace FilmsWebApi.Tests
         [TestCaseSource(typeof(ActorServiceTestData), "NewActorWithNonexistingFilms")]
         public void CannotAddActorToNonexistentFilm(Actor source)
         {
-            using (_context)
+            using (var context = GetContext())
             {
-                var service = new ActorService(_context);
+                var service = new ActorService(context);
 
                 Assert.That(() => service.AddActor(source), Throws.InstanceOf<InvalidOperationException>());
             }
@@ -173,9 +172,9 @@ namespace FilmsWebApi.Tests
         [TestCaseSource(typeof(ActorServiceTestData), "BrokenActors")]
         public void CannotAddActorWithExistingId(Actor source)
         {
-            using (_context)
+            using (var context = GetContext())
             {
-                var service = new ActorService(_context);
+                var service = new ActorService(context);
 
                 Assert.That(() => service.AddActor(source), Throws.InstanceOf<ArgumentException>());
             }
@@ -185,9 +184,9 @@ namespace FilmsWebApi.Tests
         [Test]
         public void CannotAddNull()
         {
-            using (_context)
+            using (var context = GetContext())
             {
-                var service = new ActorService(_context);
+                var service = new ActorService(context);
 
                 Assert.That(() => service.AddActor(null), Throws.InstanceOf<ArgumentNullException>());
             }
@@ -196,13 +195,13 @@ namespace FilmsWebApi.Tests
         [TestCaseSource(typeof(ActorServiceTestData), "UpdatedActors")]
         public void CanUpdateActor(Actor source)
         {
-            using (_context)
+            using (var context = GetContext())
             {
-                var service = new ActorService(_context);
+                var service = new ActorService(context);
                 service.UpdateActor(source);
             }
 
-            using (var context = new FilmContext(_options))
+            using (var context = GetContext())
             {
                 var service = new ActorService(context);
                 var actor = service.GetActor(source.Id);
@@ -218,16 +217,16 @@ namespace FilmsWebApi.Tests
         {
             var filmToDelete = source.Films.First();
 
-            using (_context)
+            using (var context = GetContext())
             {
-                var service = new ActorService(_context);
+                var service = new ActorService(context);
                 var actor = service.GetActorWithFilms(source.Id);
                 var actorfilm = actor.ActorFilms.Single(f => f.Film.Id == filmToDelete.Id);
                 actor.ActorFilms.Remove(actorfilm);
                 service.UpdateActor(actor);
             }
 
-            using (var context = new FilmContext(_options))
+            using (var context = GetContext())
             {
                 var service = new ActorService(context);
                 var actor = service.GetActorWithFilms(source.Id);
@@ -241,9 +240,9 @@ namespace FilmsWebApi.Tests
         [TestCaseSource(typeof(ActorServiceTestData), "NewActors")]
         public void CannotUpdateNonexistentActor(Actor source)
         {
-            using (_context)
+            using (var context = GetContext())
             {
-                var service = new ActorService(_context);
+                var service = new ActorService(context);
 
                 Assert.That(() => service.UpdateActor(source), Throws.InstanceOf<DbUpdateConcurrencyException>());
             }
@@ -252,9 +251,9 @@ namespace FilmsWebApi.Tests
         [Test]
         public void CannotUpdateNull()
         {
-            using (_context)
+            using (var context = GetContext())
             {
-                var service = new ActorService(_context);
+                var service = new ActorService(context);
 
                 Assert.That(() => service.UpdateActor(null), Throws.InstanceOf<ArgumentNullException>());
             }
@@ -264,14 +263,14 @@ namespace FilmsWebApi.Tests
         [TestCaseSource(typeof(ActorServiceTestData), "ExistingActors")]
         public void CanDeleteActor(Actor source)
         {
-            using (_context)
+            using (var context = GetContext())
             {
-                var service = new ActorService(_context);
+                var service = new ActorService(context);
                 var actor = service.GetActor(source.Id);
                 service.DeleteActor(actor);
             }
 
-            using (var context = new FilmContext(_options))
+            using (var context = GetContext())
             {
                 var service = new ActorService(context);
                 var actor = service.GetActor(source.Id);
@@ -282,9 +281,9 @@ namespace FilmsWebApi.Tests
         [TestCaseSource(typeof(ActorServiceTestData), "NewActors")]
         public void CannotDeleteNonexistentActor(Actor source)
         {
-            using (_context)
+            using (var context = GetContext())
             {
-                var service = new ActorService(_context);
+                var service = new ActorService(context);
 
                 Assert.That(() => service.DeleteActor(source), Throws.InstanceOf<DbUpdateConcurrencyException>());
             }
@@ -292,9 +291,9 @@ namespace FilmsWebApi.Tests
         [Test]
         public void CannotDeleteNull()
         {
-            using (_context)
+            using (var context = GetContext())
             {
-                var service = new ActorService(_context);
+                var service = new ActorService(context);
 
                 Assert.That(() => service.DeleteActor(null), Throws.InstanceOf<ArgumentNullException>());
             }
@@ -304,9 +303,9 @@ namespace FilmsWebApi.Tests
         [TestCaseSource(typeof(ActorServiceTestData), "ExistingActors")]
         public void CanCheckThatActorExists(Actor source)
         {
-            using (_context)
+            using (var context = GetContext())
             {
-                var service = new ActorService(_context);
+                var service = new ActorService(context);
 
                 Assert.That(service.ActorExists(source.Id));
             }
@@ -316,12 +315,17 @@ namespace FilmsWebApi.Tests
         [TestCaseSource(typeof(ActorServiceTestData), "NewActors")]
         public void CanCheckThatActorDoesNotExist(Actor source)
         {
-            using (_context)
+            using (var context = GetContext())
             {
-                var service = new ActorService(_context);
+                var service = new ActorService(context);
 
                 Assert.That(!service.ActorExists(source.Id));
             }
+        }
+
+        private FilmContext GetContext()
+        {
+            return new FilmContext(_options);
         }
 
         private void Seed(FilmContext context)

@@ -1,170 +1,359 @@
-using NUnit.Framework;
 using FilmsWebApi.Data;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
 using FilmsWebApi.Controllers;
-using System;
-using Microsoft.Extensions.DependencyInjection;
-using System.Threading.Tasks;
 using FilmsWebApi.Model;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using FilmsWebApi.Service;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FilmsWebApi.Tests
 {
-    public class Tests
+    public class ActorControllerTests
     {
-        //[Test]
-        //public void CanGetActors()
-        //{
-        //    var context = new GetMockFilmContext();
+        private DbContextOptions<FilmContext> _options;
 
-        //    var target = new ActorService(context);
-        //    var actors = target.GetAllActors();
+        [SetUp]
+        public void Setup()
+        {
+            var provider = new ServiceCollection()
+                .AddEntityFrameworkInMemoryDatabase()
+                .BuildServiceProvider();
 
-        //    Assert.That(actors, Has.Exactly(2).Items);
-        //}
-        //[Test]
-        //public void CanGetActorsWithFilms()
-        //{
-        //    var context = GetFilmContextMock();
+            _options = new DbContextOptionsBuilder<FilmContext>()
+                .UseInMemoryDatabase("FilmDb")
+                .UseInternalServiceProvider(provider)
+                .Options;
 
-        //    var target = new ActorsController(context);
-        //    var actors = target.GetActorsWithFilms();
+            using (var context = GetContext())
+            {
+                Seed(context);
+                ResetEntities(context);
+            }
+        }
 
-        //    Assert.That(actors, Has.All.Property("Films").Count.GreaterThan(0));
-        //}
+        [Test]
+        public void CanGetAllActorsWithoutFilms()
+        {
+            using (var context = GetContext())
+            {
+                var service = new ActorService(context);
+                var controller = new ActorsController(service);
+                var actors = controller.GetActors();
 
-        //[Test]
-        //public void CanGetSingleActorWithoutFilms()
-        //{
-        //    var context = GetFilmContextMock();
+                Assert.That(actors,
+                    Has.Count.EqualTo(2)
+                    .And.All.Property("Films").Empty);
+            }
+        }
 
-        //    var target = new ActorsController(context);
-        //    var actor = target.GetActor(1);
+        [Test]
+        public void CanGetAllActorsWithFilms()
+        {
+            using (var context = GetContext())
+            {
+                var service = new ActorService(context);
+                var controller = new ActorsController(service);
+                var actors = controller.GetActorsWithFilms();
 
-        //    Assert.That(actor.Value, 
-        //        Has.Property("FirstName").EqualTo("Robert")
-        //        .And
-        //        .Property("Films").Empty);
-        //}
+                Assert.That(actors, Has.Some.Property("Films").Not.Empty);
+            }
+        }
 
-        //[Test]
-        //public void CanGetSingleActorWithFilms()
-        //{
-        //    var context = GetFilmContextMock();
+        [Test]
+        [TestCaseSource(typeof(ActorServiceTestData), "ExistingActors")]
+        public void CanGetSingleActorWithoutFilms(Actor source)
+        {
+            using (var context = GetContext())
+            {
+                var service = new ActorService(context);
+                var controller = new ActorsController(service);
+                var actor = controller.GetActor(source.Id);
 
-        //    var target = new ActorsController(context);
-        //    var actor = target.GetActorWithFilms(2);
+                Assert.That(actor.Value,
+                    Is.Not.Null
+                    .And.Property("Films").Empty
+                    .And.Property("FirstName").EqualTo(source.FirstName)
+                    .And.Property("LastName").EqualTo(source.LastName));
+            }
+        }
 
-        //    Assert.That(actor.Value, 
-        //        Has.Property("LastName").EqualTo("Johanson")
-        //        .And
-        //        .Property("Films").Count.EqualTo(1));
-        //}
+        [Test]
+        [TestCaseSource(typeof(ActorServiceTestData), "ExistingActors")]
+        public void CanGetSingleActorWithFilms(Actor source)
+        {
+            using (var context = GetContext())
+            {
+                var service = new ActorService(context);
+                var controller = new ActorsController(service);
+                var actor = controller.GetActorWithFilms(source.Id);
 
-        //[Test]
-        //public void CanAddActor()
-        //{
-        //    var actor = new Actor() { FirstName = "Chris", LastName = "Evans" };
+                Assert.That(actor.Value,
+                    Is.Not.Null
+                    .And.Property("Films").Not.Empty
+                    .And.Property("FirstName").EqualTo(source.FirstName)
+                    .And.Property("LastName").EqualTo(source.LastName));
+            }
+        }
 
-        //    var context = GetFilmContextMock();
-        //    var target = new ActorsController(context);
+        [Test]
+        public void CannotGetNonexistentActorWithoutFilms()
+        {
+            using (var context = GetContext())
+            {
+                var service = new ActorService(context);
+                var controller = new ActorsController(service);
+                var actor = controller.GetActor(44);
 
-        //    target.PostActor(actor);
-        //    var actors = context.Actors.ToList();
+                Assert.That(actor.Value, Is.Null);
+            }
+        }
 
-        //    Assert.That(actors, Has.Exactly(1).Matches<Actor>(
-        //        a => a.FirstName == actor.FirstName && a.LastName == actor.LastName));
-        //}
+        [Test]
+        public void CannotGetNonexistentActorWithFilms()
+        {
+            using (var context = GetContext())
+            {
+                var service = new ActorService(context);
+                var controller = new ActorsController(service);
+                var actor = controller.GetActorWithFilms(44);
 
-        //[Test]
-        //public void CanAddActorWithNewFilm()
-        //{
-        //    var actor = new Actor() { FirstName = "Chris", LastName = "Evans" };
-        //    actor.ActorFilms.Add(new ActorFilm()
-        //    {
-        //        Actor = actor,
-        //        Film = new Film()
-        //        {
-        //            Title = "Captain America",
-        //            ReleaseDate = new DateTime(2011, 08, 05)
-        //        }
-        //    });
+                Assert.That(actor.Value, Is.Null);
+            }
+        }
 
-        //    var context = GetFilmContextMock();
-        //    var target = new ActorsController(context);
+        [Test]
+        [TestCaseSource(typeof(ActorServiceTestData), "NewActors")]
+        public void CanAddActorWithoutAnyFilm(Actor source)
+        {
+            using (var context = GetContext())
+            {
+                var service = new ActorService(context);
+                var controller = new ActorsController(service);
+                controller.PostActor(source);
+            }
 
-        //    target.PostActor(actor);
-        //    var resultActor = context.Actors
-        //        .FirstOrDefault(a => a.FirstName == actor.FirstName && a.LastName == actor.LastName);
+            using (var context = GetContext())
+            {
+                var service = new ActorService(context);
+                var controller = new ActorsController(service);
+                var actor = controller.GetActorWithFilms(source.Id);
+                Assert.That(actor.Value,
+                    Is.Not.Null
+                    .And.Property("FirstName").EqualTo(source.FirstName)
+                    .And.Property("LastName").EqualTo(source.LastName)
+                    .And.Property("Films").Empty);
+            }
+        }
 
-        //    Assert.That(resultActor, 
-        //        Is.Not.Null
-        //        .And
-        //        .Property("Films").Count.EqualTo(1));
-        //}
+        [Test]
+        [TestCaseSource(typeof(ActorServiceTestData), "NewActorWithExistingFilms")]
+        public void CanAddActorToExistingFilm(Actor source)
+        {
+            using (var context = GetContext())
+            {
+                var service = new ActorService(context);
+                var controller = new ActorsController(service);
+                var actor = controller.PostActor(source);
+            }
 
-        //[Test]
-        //public void CanAddActorToExistingFilm()
-        //{
-        //    var actor = new Actor() { FirstName = "Chris", LastName = "Evans" };
-        //    var filmId = 2;
-        //    actor.ActorFilms.Add(new ActorFilm { FilmId = filmId });
+            using (var context = GetContext())
+            {
+                var service = new ActorService(context);
+                var controller = new ActorsController(service);
+                var actor = controller.GetActorWithFilms(source.Id);
+                Assert.That(actor.Value.Films, new ContainsAllFilmTitlesConstraint(source.Films));
+            }
+        }
 
-        //    var context = GetFilmContextMock();
-        //    var target = new ActorsController(context);
+        [Test]
+        [TestCaseSource(typeof(ActorServiceTestData), "NewActorWithNonexistingFilms")]
+        public void CannotAddActorToNonexistentFilm(Actor source)
+        {
+            using (var context = GetContext())
+            {
+                var service = new ActorService(context);
+                var controller = new ActorsController(service);
+                var response = controller.PostActor(source);
 
-        //    target.PostActor(actor);
-        //    var resultActor = context.Actors
-        //        .FirstOrDefault(a => a.FirstName == actor.FirstName && a.LastName == actor.LastName);
+                Assert.That(response.Result, Is.TypeOf<BadRequestResult>());
+            }
+        }
 
-        //    Assert.That(resultActor, 
-        //        Is.Not.Null
-        //        .And
-        //        .Property("Films").Exactly(1).Matches<Film>(
-        //            f => f.Id == filmId && f.Title == "Avengers"));
-        //}
+        [Test]
+        [TestCaseSource(typeof(ActorServiceTestData), "BrokenActors")]
+        public void CannotAddActorWithExistingId(Actor source)
+        {
+            using (var context = GetContext())
+            {
+                var service = new ActorService(context);
+                var controller = new ActorsController(service);
 
-        //[Test]
-        //public void CanUpdateActor()
-        //{
-        //    var id = 1;
-        //    var newLastName = "Downey Junior";
-        //    var actor = new Actor() { Id = id, FirstName = "Robert", LastName = newLastName};
+                var response = controller.PostActor(source);
 
-        //    var context = GetFilmContextMock();
-        //    var target = new ActorsController(context);
+                Assert.That(response.Result, Is.TypeOf<BadRequestResult>());
+            }
 
-        //    target.PutActor(id, actor);
-        //    var resultActor = context.Actors
-        //        .FirstOrDefault(a => a.Id == id);
+        }
 
-        //    Assert.That(resultActor, Has.Property("LastName").EqualTo(newLastName));
-        //}
+        [Test]
+        public void CannotAddNull()
+        {
+            using (var context = GetContext())
+            {
+                var service = new ActorService(context);
+                var controller = new ActorsController(service);
 
-        //[Test]
-        //public void CanDeleteActor()
-        //{
-        //    var id = 1;
-        //    var context = GetFilmContextMock();
-        //    var target = new ActorsController(context);
+                var response = controller.PostActor(null);
 
-        //    target.DeleteActor(id);
+                Assert.That(response.Result, Is.TypeOf<BadRequestResult>());
+            }
+        }
 
-        //    var actors = context.Actors.ToList();
+        [Test]
+        [TestCaseSource(typeof(ActorServiceTestData), "UpdatedActors")]
+        public void CanUpdateActor(Actor source)
+        {
+            using (var context = GetContext())
+            {
+                var service = new ActorService(context);
+                var controller = new ActorsController(service);
+                controller.PutActor(source.Id, source);
+            }
 
-        //    Assert.That(actors, Has.Exactly(0).Matches<Actor>(a => a.Id == id));
-        //}
+            using (var context = GetContext())
+            {
+                var service = new ActorService(context);
+                var controller = new ActorsController(service);
+                var actor = controller.GetActor(source.Id);
+                Assert.That(actor.Value,
+                    Has.Property("LastName").EqualTo(source.LastName)
+                    .And.Property("FirstName").EqualTo(source.FirstName));
+            }
+        }
 
-        //[Test]
-        //public void CannotFindNonexistentActor()
-        //{
-        //    var context = GetFilmContextMock();
-        //    var target = new ActorsController(context);
-        //    var result = target.GetActor(44);
+        [Test]
+        [TestCaseSource(typeof(ActorServiceTestData), "ExistingActors")]
+        public void CanRemoveFilmFromActor(Actor source)
+        {
+            var filmToDelete = source.Films.First();
 
-        //    Assert.That(result.Result, Is.TypeOf<NotFoundResult>());
-        //}
+            using (var context = GetContext())
+            {
+                var service = new ActorService(context);
+                var actor = service.GetActorWithFilms(source.Id);
+                var actorfilm = actor.ActorFilms.Single(f => f.Film.Id == filmToDelete.Id);
+                actor.ActorFilms.Remove(actorfilm);
+                var controller = new ActorsController(service);
+                controller.PutActor(actor.Id, actor);
+            }
+
+            using (var context = GetContext())
+            {
+                var service = new ActorService(context);
+                var controller = new ActorsController(service);
+                var actor = controller.GetActorWithFilms(source.Id);
+                Assert.That(actor.Value.Films,
+                    Has.Exactly(source.Films.Count - 1).Items
+                    .And.Exactly(0).Matches<Film>(f => f.Id == filmToDelete.Id));
+            }
+        }
+
+        [Test]
+        [TestCaseSource(typeof(ActorServiceTestData), "NewActors")]
+        public void CannotUpdateNonexistentActor(Actor source)
+        {
+            using (var context = GetContext())
+            {
+                var service = new ActorService(context);
+                var controller = new ActorsController(service);
+                var response = controller.PutActor(source.Id, source);
+
+                Assert.That(response, Is.TypeOf<NotFoundResult>());
+            }
+        }
+
+        [Test]
+        public void CannotUpdateNull()
+        {
+            using (var context = GetContext())
+            {
+                var service = new ActorService(context);
+                var controller = new ActorsController(service);
+                var response = controller.PutActor(0, null);
+
+                Assert.That(response, Is.TypeOf<BadRequestResult>());
+            }
+        }
+
+        [Test]
+        [TestCaseSource(typeof(ActorServiceTestData), "ExistingActors")]
+        public void CanDeleteActor(Actor source)
+        {
+            using (var context = GetContext())
+            {
+                var service = new ActorService(context);
+                var actor = service.GetActor(source.Id);
+                var controller = new ActorsController(service);
+                controller.DeleteActor(actor.Id);
+            }
+
+            using (var context = GetContext())
+            {
+                var service = new ActorService(context);
+                var controller = new ActorsController(service);
+                var actor = controller.GetActor(source.Id);
+                Assert.That(actor.Value, Is.Null);
+            }
+        }
+
+        [Test]
+        [TestCaseSource(typeof(ActorServiceTestData), "NewActors")]
+        public void CannotDeleteNonexistentActor(Actor source)
+        {
+            using (var context = GetContext())
+            {
+                var service = new ActorService(context);
+                var controller = new ActorsController(service);
+                var response = controller.DeleteActor(source.Id);
+
+                Assert.That(response.Result, Is.TypeOf<NotFoundResult>());
+            }
+        }
+
+
+        private FilmContext GetContext()
+        {
+            return new FilmContext(_options);
+        }
+        private void Seed(FilmContext context)
+        {
+            var actor1 = new Actor { Id = 1, FirstName = "Robert", LastName = "Downey" };
+            var actor2 = new Actor { Id = 2, FirstName = "Scarlett", LastName = "Johanson" };
+
+            var film1 = new Film { Id = 1, Title = "Iron Man", ReleaseDate = new DateTime(2008, 4, 30) };
+            var film2 = new Film { Id = 2, Title = "Avengers", ReleaseDate = new DateTime(2012, 4, 11) };
+
+            actor1.ActorFilms.Add(new ActorFilm { Film = film1 });
+            actor1.ActorFilms.Add(new ActorFilm { Film = film2 });
+            actor2.ActorFilms.Add(new ActorFilm { Film = film2 });
+
+            var actors = new List<Actor> { actor1, actor2 };
+
+            context.Actors.AddRange(actors);
+            context.SaveChanges();
+        }
+        private void ResetEntities(FilmContext context)
+        {
+            var entries = context.ChangeTracker.Entries();
+            foreach (var entry in entries)
+            {
+                entry.State = EntityState.Detached;
+            }
+        }
     }
 }
