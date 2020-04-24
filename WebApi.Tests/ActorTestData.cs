@@ -7,7 +7,7 @@ using System.Text;
 
 namespace FilmsWebApi.Tests
 {
-    public class ActorServiceTestData
+    public class ActorTestData
     {
         public static List<Film> ExistingFilms
         {

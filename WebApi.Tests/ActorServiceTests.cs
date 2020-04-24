@@ -28,8 +28,9 @@ namespace FilmsWebApi.Tests
 
             using (var context = GetContext())
             {
-                Seed(context);
-                ResetEntities(context);
+                var helper = new ActorTestFilmContextHelper(context);
+                helper.SeedContext();
+                helper.ResetEntities();
             }
         }
 
@@ -60,7 +61,7 @@ namespace FilmsWebApi.Tests
         }
 
         [Test]
-        [TestCaseSource(typeof(ActorServiceTestData), "ExistingActors")]
+        [TestCaseSource(typeof(ActorTestData), "ExistingActors")]
         public void CanGetSingleActorWithoutFilms(Actor source)
         {
             using (var context = GetContext())
@@ -77,7 +78,7 @@ namespace FilmsWebApi.Tests
         }
 
         [Test]
-        [TestCaseSource(typeof(ActorServiceTestData), "ExistingActors")]
+        [TestCaseSource(typeof(ActorTestData), "ExistingActors")]
         public void CanGetSingleActorWithFilms(Actor source)
         {
             using (var context = GetContext())
@@ -118,7 +119,7 @@ namespace FilmsWebApi.Tests
         }
 
         [Test]
-        [TestCaseSource(typeof(ActorServiceTestData), "NewActors")]
+        [TestCaseSource(typeof(ActorTestData), "NewActors")]
         public void CanAddActorWithoutAnyFilm(Actor source)
         {
             using(var context = GetContext())
@@ -139,7 +140,7 @@ namespace FilmsWebApi.Tests
             }
         }
         [Test]
-        [TestCaseSource(typeof(ActorServiceTestData), "NewActorWithExistingFilms")]
+        [TestCaseSource(typeof(ActorTestData), "NewActorWithExistingFilms")]
         public void CanAddActorToExistingFilm(Actor source)
         {
             using(var context = GetContext()) 
@@ -157,7 +158,7 @@ namespace FilmsWebApi.Tests
         }
 
         [Test]
-        [TestCaseSource(typeof(ActorServiceTestData), "NewActorWithNonexistingFilms")]
+        [TestCaseSource(typeof(ActorTestData), "NewActorWithNonexistingFilms")]
         public void CannotAddActorToNonexistentFilm(Actor source)
         {
             using (var context = GetContext())
@@ -169,7 +170,7 @@ namespace FilmsWebApi.Tests
         }
 
         [Test]
-        [TestCaseSource(typeof(ActorServiceTestData), "BrokenActors")]
+        [TestCaseSource(typeof(ActorTestData), "BrokenActors")]
         public void CannotAddActorWithExistingId(Actor source)
         {
             using (var context = GetContext())
@@ -192,7 +193,7 @@ namespace FilmsWebApi.Tests
             }
         }
         [Test]
-        [TestCaseSource(typeof(ActorServiceTestData), "UpdatedActors")]
+        [TestCaseSource(typeof(ActorTestData), "UpdatedActors")]
         public void CanUpdateActor(Actor source)
         {
             using (var context = GetContext())
@@ -212,7 +213,7 @@ namespace FilmsWebApi.Tests
         }
 
         [Test]
-        [TestCaseSource(typeof(ActorServiceTestData), "ExistingActors")]
+        [TestCaseSource(typeof(ActorTestData), "ExistingActors")]
         public void CanRemoveFilmFromActor(Actor source)
         {
             var filmToDelete = source.Films.First();
@@ -237,7 +238,7 @@ namespace FilmsWebApi.Tests
         }
 
         [Test]
-        [TestCaseSource(typeof(ActorServiceTestData), "NewActors")]
+        [TestCaseSource(typeof(ActorTestData), "NewActors")]
         public void CannotUpdateNonexistentActor(Actor source)
         {
             using (var context = GetContext())
@@ -260,7 +261,7 @@ namespace FilmsWebApi.Tests
         }
 
         [Test]
-        [TestCaseSource(typeof(ActorServiceTestData), "ExistingActors")]
+        [TestCaseSource(typeof(ActorTestData), "ExistingActors")]
         public void CanDeleteActor(Actor source)
         {
             using (var context = GetContext())
@@ -278,7 +279,7 @@ namespace FilmsWebApi.Tests
             }
         }
         [Test]
-        [TestCaseSource(typeof(ActorServiceTestData), "NewActors")]
+        [TestCaseSource(typeof(ActorTestData), "NewActors")]
         public void CannotDeleteNonexistentActor(Actor source)
         {
             using (var context = GetContext())
@@ -300,7 +301,7 @@ namespace FilmsWebApi.Tests
 
         }
         [Test]
-        [TestCaseSource(typeof(ActorServiceTestData), "ExistingActors")]
+        [TestCaseSource(typeof(ActorTestData), "ExistingActors")]
         public void CanCheckThatActorExists(Actor source)
         {
             using (var context = GetContext())
@@ -312,7 +313,7 @@ namespace FilmsWebApi.Tests
         }
 
         [Test]
-        [TestCaseSource(typeof(ActorServiceTestData), "NewActors")]
+        [TestCaseSource(typeof(ActorTestData), "NewActors")]
         public void CanCheckThatActorDoesNotExist(Actor source)
         {
             using (var context = GetContext())
@@ -326,32 +327,6 @@ namespace FilmsWebApi.Tests
         private FilmContext GetContext()
         {
             return new FilmContext(_options);
-        }
-
-        private void Seed(FilmContext context)
-        {
-            var actor1 = new Actor { Id = 1, FirstName = "Robert", LastName = "Downey" };
-            var actor2 = new Actor { Id = 2, FirstName = "Scarlett", LastName = "Johanson" };
-
-            var film1 = new Film { Id = 1, Title = "Iron Man", ReleaseDate = new DateTime(2008, 4, 30) };
-            var film2 = new Film { Id = 2, Title = "Avengers", ReleaseDate = new DateTime(2012, 4, 11) };
-
-            actor1.ActorFilms.Add(new ActorFilm { Film = film1 });
-            actor1.ActorFilms.Add(new ActorFilm { Film = film2 });
-            actor2.ActorFilms.Add(new ActorFilm { Film = film2 });
-
-            var actors =  new List<Actor> { actor1, actor2 };
-
-            context.Actors.AddRange(actors);
-            context.SaveChanges();
-        }
-        private void ResetEntities(FilmContext context)
-        {
-            var entries = context.ChangeTracker.Entries();
-            foreach (var entry in entries)
-            {
-                entry.State = EntityState.Detached;
-            }
         }
     }
 }
