@@ -20,7 +20,7 @@ namespace FilmsWebApi.Tests
                 return new List<Film> { film1, film2 };
             }
         }
-        public static List<Film> ExistingFilms
+        public static List<Film> ExistingFilmsWithActors
         {
             get
             {
@@ -92,8 +92,8 @@ namespace FilmsWebApi.Tests
                 var actors = NewActors;
                 foreach (var actor in actors)
                 {
-                    actor.ActorFilms.Add(new ActorFilm { Film = ExistingFilms[0] });
-                    actor.ActorFilms.Add(new ActorFilm { Film = ExistingFilms[1] });
+                    actor.ActorFilms.Add(new ActorFilm { Film = ExistingFilmsWithActors[0] });
+                    actor.ActorFilms.Add(new ActorFilm { Film = ExistingFilmsWithActors[1] });
                 }
                 return actors;
             }
@@ -161,7 +161,7 @@ namespace FilmsWebApi.Tests
                 var films = NewFilms;
                 foreach (var film in films)
                 {
-                    film.Id = ExistingFilms.First().Id;
+                    film.Id = ExistingFilmsWithActors.First().Id;
                 }
                 return films;
             }
@@ -185,7 +185,7 @@ namespace FilmsWebApi.Tests
         {
             get
             {
-                var films = ExistingFilms;
+                var films = ExistingFilmsWithActors;
                 foreach (var film in films)
                 {
                     film.Title += "2";

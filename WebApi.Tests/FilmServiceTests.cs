@@ -60,7 +60,7 @@ namespace FilmsWebApi.Tests
         }
 
         [Test]
-        [TestCaseSource(typeof(TestData), "ExistingFilms")]
+        [TestCaseSource(typeof(TestData), "ExistingFilmsWithActors")]
         public void CanGetSingleFilmWithoutActors(Film source)
         {
             using (var context = GetContext())
@@ -77,7 +77,7 @@ namespace FilmsWebApi.Tests
         }
 
         [Test]
-        [TestCaseSource(typeof(TestData), "ExistingFilms")]
+        [TestCaseSource(typeof(TestData), "ExistingFilmsWithActors")]
         public void CanGetSingleFilmWithActors(Film source)
         {
             using (var context = GetContext())
@@ -213,7 +213,7 @@ namespace FilmsWebApi.Tests
         }
 
         [Test]
-        [TestCaseSource(typeof(TestData), "ExistingFilms")]
+        [TestCaseSource(typeof(TestData), "ExistingFilmsWithActors")]
         public void CanRemoveActorFromFilm(Film source)
         {
             var actorToDelete = source.Actors.First();
@@ -261,7 +261,7 @@ namespace FilmsWebApi.Tests
         }
 
         [Test]
-        [TestCaseSource(typeof(TestData), "ExistingFilms")]
+        [TestCaseSource(typeof(TestData), "ExistingFilmsWithActors")]
         public void CanDeleteFilm(Film source)
         {
             using (var context = GetContext())
@@ -304,7 +304,7 @@ namespace FilmsWebApi.Tests
         }
 
         [Test]
-        [TestCaseSource(typeof(TestData), "ExistingFilms")]
+        [TestCaseSource(typeof(TestData), "ExistingFilmsWithActors")]
         public void CanCheckThatFilmExists(Film source)
         {
             using (var context = GetContext())

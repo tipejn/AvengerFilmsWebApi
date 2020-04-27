@@ -29,14 +29,14 @@ namespace FilmsWebApi.Tests
         public void CanGetAllFilmsWithActors()
         {
             var mock = new Mock<IFilmService>();
-            mock.Setup(m => m.GetAllFilmsWithActors()).Returns(TestData.ExistingFilms);
+            mock.Setup(m => m.GetAllFilmsWithActors()).Returns(TestData.ExistingFilmsWithActors);
 
             var controller = new FilmsController(mock.Object);
             var actors = controller.GetFilmsWithActors();
 
             mock.Verify(m => m.GetAllFilmsWithActors(), Times.Once);
 
-            Assert.That(actors, Has.Count.EqualTo(TestData.ExistingFilms.Count()));
+            Assert.That(actors, Has.Count.EqualTo(TestData.ExistingFilmsWithActors.Count()));
         }
 
         [Test]
@@ -55,7 +55,7 @@ namespace FilmsWebApi.Tests
         }
 
         [Test]
-        [TestCaseSource(typeof(TestData), "ExistingFilms")]
+        [TestCaseSource(typeof(TestData), "ExistingFilmsWithActors")]
         public void CanGetSingleFilmWithActors(Film source)
         {
             var mock = new Mock<IFilmService>();
@@ -218,7 +218,7 @@ namespace FilmsWebApi.Tests
         }
 
         [Test]
-        [TestCaseSource(typeof(TestData), "ExistingFilms")]
+        [TestCaseSource(typeof(TestData), "ExistingFilmsWithActors")]
         public void CanDeleteFilm(Film source)
         {
             var mock = new Mock<IFilmService>();
