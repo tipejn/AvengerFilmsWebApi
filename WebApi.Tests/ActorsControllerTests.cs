@@ -15,32 +15,32 @@ namespace FilmsWebApi.Tests
         public void CanGetAllActorsWithoutFilms()
         {
             var mock = new Mock<IActorService>();
-            mock.Setup(m => m.GetAllActors()).Returns(ActorTestData.NewActors);
+            mock.Setup(m => m.GetAllActors()).Returns(TestData.NewActors);
 
             var controller = new ActorsController(mock.Object);
             var actors = controller.GetActors();
 
             mock.Verify(m => m.GetAllActors(), Times.Once);
 
-            Assert.That(actors, Has.Count.EqualTo(ActorTestData.NewActors.Count()));
+            Assert.That(actors, Has.Count.EqualTo(TestData.NewActors.Count()));
         }
 
         [Test]
         public void CanGetAllActorsWithFilms()
         {
             var mock = new Mock<IActorService>();
-            mock.Setup(m => m.GetAllActorsWithFilms()).Returns(ActorTestData.ExistingActors);
+            mock.Setup(m => m.GetAllActorsWithFilms()).Returns(TestData.ExistingActors);
 
             var controller = new ActorsController(mock.Object);
             var actors = controller.GetActorsWithFilms();
 
             mock.Verify(m => m.GetAllActorsWithFilms(), Times.Once);
 
-            Assert.That(actors, Has.Count.EqualTo(ActorTestData.ExistingActors.Count()));
+            Assert.That(actors, Has.Count.EqualTo(TestData.ExistingActors.Count()));
         }
 
         [Test]
-        [TestCaseSource(typeof(ActorTestData), "NewActors")]
+        [TestCaseSource(typeof(TestData), "NewActors")]
         public void CanGetSingleActorWithoutFilms(Actor source)
         {
             var mock = new Mock<IActorService>();
@@ -55,7 +55,7 @@ namespace FilmsWebApi.Tests
         }
 
         [Test]
-        [TestCaseSource(typeof(ActorTestData), "ExistingActors")]
+        [TestCaseSource(typeof(TestData), "ExistingActors")]
         public void CanGetSingleActorWithFilms(Actor source)
         {
             var mock = new Mock<IActorService>();
@@ -102,7 +102,7 @@ namespace FilmsWebApi.Tests
         }
 
         [Test]
-        [TestCaseSource(typeof(ActorTestData), "NewActors")]
+        [TestCaseSource(typeof(TestData), "NewActors")]
         public void CanAddActor(Actor source)
         {
             var mock = new Mock<IActorService>();
@@ -117,7 +117,7 @@ namespace FilmsWebApi.Tests
         }
 
         [Test]
-        [TestCaseSource(typeof(ActorTestData), "NewActorWithNonexistingFilms")]
+        [TestCaseSource(typeof(TestData), "NewActorWithNonexistingFilms")]
         public void CanCatchExceptionWhenAddingActorToNonExistingFilm(Actor source)
         {
             var mock = new Mock<IActorService>();
@@ -132,7 +132,7 @@ namespace FilmsWebApi.Tests
         }
 
         [Test]
-        [TestCaseSource(typeof(ActorTestData), "BrokenActors")]
+        [TestCaseSource(typeof(TestData), "BrokenActors")]
         public void CannotAddActorWithExistingId(Actor source)
         {
             var mock = new Mock<IActorService>();
@@ -160,7 +160,7 @@ namespace FilmsWebApi.Tests
         }
 
         [Test]
-        [TestCaseSource(typeof(ActorTestData), "UpdatedActors")]
+        [TestCaseSource(typeof(TestData), "UpdatedActors")]
         public void CanUpdateActor(Actor source)
         {
             var mock = new Mock<IActorService>();
@@ -175,7 +175,7 @@ namespace FilmsWebApi.Tests
         }
 
         [Test]
-        [TestCaseSource(typeof(ActorTestData), "NewActors")]
+        [TestCaseSource(typeof(TestData), "NewActors")]
         public void CannotUpdateNonexistentActor(Actor source)
         {
             var mock = new Mock<IActorService>();
@@ -204,7 +204,7 @@ namespace FilmsWebApi.Tests
 
 
         [Test]
-        [TestCaseSource(typeof(ActorTestData), "NewActors")]
+        [TestCaseSource(typeof(TestData), "NewActors")]
         public void CannotUpdateWhenBrokenId(Actor source)
         {
             var mock = new Mock<IActorService>();
@@ -218,7 +218,7 @@ namespace FilmsWebApi.Tests
         }
 
         [Test]
-        [TestCaseSource(typeof(ActorTestData), "ExistingActors")]
+        [TestCaseSource(typeof(TestData), "ExistingActors")]
         public void CanDeleteActor(Actor source)
         {
             var mock = new Mock<IActorService>();
@@ -233,7 +233,7 @@ namespace FilmsWebApi.Tests
         }
 
         [Test]
-        [TestCaseSource(typeof(ActorTestData), "NewActors")]
+        [TestCaseSource(typeof(TestData), "NewActors")]
         public void CannotDeleteNonexistentActor(Actor source)
         {
             var mock = new Mock<IActorService>();

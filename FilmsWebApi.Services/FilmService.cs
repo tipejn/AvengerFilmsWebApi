@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace FilmsWebApi.Service
 {
@@ -16,25 +15,25 @@ namespace FilmsWebApi.Service
             _context = context;
         }
 
-        public void AddFilm(Film Film)
+        public void AddFilm(Film film)
         {
-            if (Film == null)
+            if (film == null)
             {
                 throw new ArgumentNullException();
             }
 
-            EnsureHasActors(Film);
-            _context.Films.Add(Film);
+            EnsureHasActors(film);
+            _context.Films.Add(film);
             _context.SaveChanges();
         }
 
-        public void DeleteFilm(Film Film)
+        public void DeleteFilm(Film film)
         {
-            if (Film == null)
+            if (film == null)
             {
                 throw new ArgumentNullException();
             }
-            _context.Films.Remove(Film);
+            _context.Films.Remove(film);
             _context.SaveChanges();
         }
 
@@ -43,11 +42,11 @@ namespace FilmsWebApi.Service
             return _context.Films.Find(id);
         }
 
-        public Film GetFilmWithFilms(int id)
+        public Film GetFilmWithActors(int id)
         {
             return _context.Films
                 .Include(f => f.ActorFilms)
-                    .ThenInclude(a => a.Film)
+                    .ThenInclude(a => a.Actor)
                 .FirstOrDefault(a => a.Id == id);
         }
 
@@ -56,41 +55,34 @@ namespace FilmsWebApi.Service
             return _context.Films.ToList();
         }
 
-        public IEnumerable<Film> GetAllFilmsWithFilms()
+        public IEnumerable<Film> GetAllFilmsWithActors()
         {
             return _context.Films
                 .Include(f => f.ActorFilms)
-                    .ThenInclude(a => a.Film)
+                    .ThenInclude(a => a.Actor)
                 .ToList();
         }
 
-        public void UpdateFilm(Film Film)
+        public void UpdateFilm(Film film)
         {
-            if (Film == null)
+            if (film == null)
             {
                 throw new ArgumentNullException();
             }
 
-            EnsureHasActors(Film);
-            _context.Entry(Film).State = EntityState.Modified;
+            EnsureHasActors(film);
+            _context.Entry(film).State = EntityState.Modified;
             _context.SaveChanges();
         }
         public bool FilmExists(int id)
         {
-            return _context.Films.Any(e => e.Id == id);
+            return _context.Films.Any(f => f.Id == id);
         }
-        public bool ActorExists(int id)
+        private void EnsureHasActors(Film film)
         {
-            return _context.Actors.Any(e => e.Id == id);
-        }
-        private void EnsureHasActors(Film Film)
-        {
-            foreach (var actorFilm in Film.ActorFilms)
+            foreach (var actorFilm in film.ActorFilms)
             {
-                if (ActorExists(actorFilm.ActorId))
-                {
-                    actorFilm.Film = _context.Films.Single(f => f.Id == actorFilm.FilmId);
-                }
+                actorFilm.Actor = _context.Actors.Single(a => a.Id == actorFilm.Actor.Id);
             }
         }
     }

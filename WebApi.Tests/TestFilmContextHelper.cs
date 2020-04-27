@@ -6,10 +6,10 @@ using System.Collections.Generic;
 
 namespace FilmsWebApi.Tests
 {
-    class ActorTestFilmContextHelper
+    class TestFilmContextHelper
     {
         private FilmContext _context;
-        public ActorTestFilmContextHelper(FilmContext context)
+        public TestFilmContextHelper(FilmContext context)
         {
             _context = context;
         }

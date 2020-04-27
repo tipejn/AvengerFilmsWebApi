@@ -7,7 +7,7 @@ using System.Text;
 
 namespace FilmsWebApi.Tests
 {
-    public class ActorTestData
+    public class TestData
     {
         public static List<Film> ExistingFilms
         {
@@ -32,7 +32,7 @@ namespace FilmsWebApi.Tests
                 };
             }
         }
-        public static IEnumerable<Actor> ExistingActors
+        public static List<Actor> ExistingActors
         {
             get
             {
@@ -47,7 +47,7 @@ namespace FilmsWebApi.Tests
             }
         }
 
-        public static IEnumerable<Actor> NewActors
+        public static List<Actor> NewActors
         {
             get
             {
@@ -74,6 +74,20 @@ namespace FilmsWebApi.Tests
             }
         }
 
+        public static IEnumerable<Film> NewFilmsWithExistingActors
+        {
+            get
+            {
+                var films = NewFilms;
+                foreach (var film in films)
+                {
+                    film.ActorFilms.Add(new ActorFilm { Actor = ExistingActors[0] });
+                    film.ActorFilms.Add(new ActorFilm { Actor = ExistingActors[1] });
+                }
+                return films;
+            }
+        }
+
         public static IEnumerable<Actor> NewActorWithNonexistingFilms
         {
             get
@@ -85,6 +99,20 @@ namespace FilmsWebApi.Tests
                     actor.ActorFilms.Add(new ActorFilm { Film = NewFilms[1] });
                 }
                 return actors;
+            }
+        }
+
+        public static IEnumerable<Film> NewFilmsWithNonexistingActors
+        {
+            get
+            {
+                var films = NewFilms;
+                foreach (var film in films)
+                {
+                    film.ActorFilms.Add(new ActorFilm { Actor = NewActors[0] });
+                    film.ActorFilms.Add(new ActorFilm { Actor = NewActors[1] });
+                }
+                return films;
             }
         }
 
@@ -101,6 +129,19 @@ namespace FilmsWebApi.Tests
             }
         }
 
+        public static IEnumerable<Film> BrokenFilms
+        {
+            get
+            {
+                var films = NewFilms;
+                foreach (var film in films)
+                {
+                    film.Id = ExistingFilms.First().Id;
+                }
+                return films;
+            }
+        }
+
         public static IEnumerable<Actor> UpdatedActors
         {
             get
@@ -112,6 +153,20 @@ namespace FilmsWebApi.Tests
                     actor.LastName += "updated";
                 }
                 return actors;
+            }
+        }
+
+        public static IEnumerable<Film> UpdatedFIlms
+        {
+            get
+            {
+                var films = ExistingFilms;
+                foreach (var film in films)
+                {
+                    film.Title += "2";
+                    film.ReleaseDate = film.ReleaseDate.AddDays(3);
+                }
+                return films;
             }
         }
     }
