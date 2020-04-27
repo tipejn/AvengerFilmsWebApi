@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using FilmsWebApi.Model;
+using FilmsWebApi.Service;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using FilmsWebApi;
-using FilmsWebApi.Data;
-using FilmsWebApi.Model;
+using System;
+using System.Collections.Generic;
 
 namespace FilmsWebApi.Controllers
 {
@@ -15,138 +10,111 @@ namespace FilmsWebApi.Controllers
     [ApiController]
     public class FilmsController : ControllerBase
     {
-        private readonly FilmContext _context;
+        private readonly IFilmService _service;
 
-        public FilmsController(FilmContext context)
+        public FilmsController(IFilmService service)
         {
-            _context = context;
+            _service = service;
         }
 
         // GET: Films
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Film>>> GetFilms()
+        public IEnumerable<Film> GetFilms()
         {
-            return await _context.Films
-                .ToListAsync();
+            return _service.GetAllFilms();
         }
 
-        // GET: Films
+        // GET: Films/Actors
         [HttpGet]
         [Route("actors")]
-        public async Task<ActionResult<IEnumerable<Film>>> GetFilmsWithActors()
+        public IEnumerable<Film> GetFilmsWithActors()
         {
-            return await _context.Films
-                .Include(f => f.ActorFilms)
-                    .ThenInclude(f => f.Actor)
-                .ToListAsync();
+            return _service.GetAllFilmsWithActors();
         }
 
         // GET: Films/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Film>> GetFilm(int id)
+        public ActionResult<Film> GetFilm(int id)
         {
-            var film = await _context.Films.FindAsync(id);
+            var actor = _service.GetFilm(id);
 
-            if (film == null)
+            if (actor is null)
             {
                 return NotFound();
             }
 
-            return film;
+            return actor;
         }
 
-        // GET: Films/5/actors
+        // GET: Films/5/Actors
         [HttpGet("{id}/actors")]
-        public async Task<ActionResult<Film>> GetFilmWithActors(int id)
+        public ActionResult<Film> GetFilmWithActors(int id)
         {
-            var film = await _context.Films
-                .Include(a => a.ActorFilms)
-                    .ThenInclude(a => a.Actor)
-                .FirstOrDefaultAsync(f => f.Id == id);
+            var actor = _service.GetFilmWithActors(id);
 
-            if (film == null)
+            if (actor is null)
             {
                 return NotFound();
             }
 
-            return film;
+            return actor;
         }
 
         // PUT: Films/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutFilm(int id, Film film)
+        public IActionResult PutActor(int id, Film film)
         {
-            if (id != film.Id)
+            if (film is null || id != film.Id)
             {
                 return BadRequest();
             }
 
-            EnsureHasActors(film);
-
-            _context.Entry(film).State = EntityState.Modified;
-
-            try
+            if (!_service.FilmExists(id))
             {
-                await _context.SaveChangesAsync();
+                return NotFound();
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!FilmExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+
+            _service.UpdateFilm(film);
 
             return NoContent();
         }
 
         // POST: Films
         [HttpPost]
-        public async Task<ActionResult<Film>> PostFilm(Film film)
+        public ActionResult<Film> PostFilm(Film film)
         {
-            EnsureHasActors(film);
+            if (film is null || _service.FilmExists(film.Id))
+            {
+                return BadRequest();
+            }
 
-            _context.Films.Add(film);
-            
-            await _context.SaveChangesAsync();
+            try
+            {
+                _service.AddFilm(film);
+            }
+            catch (InvalidOperationException)
+            {
+                return BadRequest();
+            }
 
             return CreatedAtAction("GetFilm", new { id = film.Id }, film);
         }
 
         // DELETE: Films/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Film>> DeleteFilm(int id)
+        public ActionResult<Film> DeleteFilm(int id)
         {
-            var film = await _context.Films.FindAsync(id);
-            if (film == null)
+            var film = _service.GetFilm(id);
+
+            if (film is null)
             {
                 return NotFound();
             }
 
-            _context.Films.Remove(film);
-            await _context.SaveChangesAsync();
+            _service.DeleteFilm(film);
 
-            return film;
+            return NoContent();
         }
 
-        private bool FilmExists(int id)
-        {
-            return _context.Films.Any(e => e.Id == id);
-        }
-
-        private void EnsureHasActors(Film film)
-        {
-            foreach (var actorFilm in film.ActorFilms)
-            {
-                if (actorFilm.ActorId != 0)
-                {
-                    actorFilm.Actor = _context.Actors.FirstOrDefault(a => a.Id == actorFilm.ActorId);
-                }
-            }
-        }
     }
 }
