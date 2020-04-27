@@ -1,12 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using FilmsWebApi.Data;
-using FilmsWebApi.Model;
+﻿using FilmsWebApi.Model;
 using FilmsWebApi.Service;
+using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 
 namespace FilmsWebApi.Controllers
 {

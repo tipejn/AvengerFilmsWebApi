@@ -9,15 +9,29 @@ namespace FilmsWebApi.Tests
 {
     public class TestData
     {
+
+        public static List<Film> ExistingFilmsWithoutActors
+        {
+            get
+            {
+                var film1 = new Film { Id = 1, Title = "Iron Man", ReleaseDate = new DateTime(2008, 4, 30) };
+                var film2 = new Film { Id = 2, Title = "Avengers", ReleaseDate = new DateTime(2012, 4, 11) };
+
+                return new List<Film> { film1, film2 };
+            }
+        }
         public static List<Film> ExistingFilms
         {
             get
             {
-                return new List<Film>
-                {
-                    new Film { Id = 1, Title = "Iron Man", ReleaseDate = new DateTime(2008, 4, 30) },
-                    new Film { Id = 2, Title = "Avengers", ReleaseDate = new DateTime(2012, 4, 11) }
-                };
+                var film1 = new Film { Id = 1, Title = "Iron Man", ReleaseDate = new DateTime(2008, 4, 30) };
+                var film2 = new Film { Id = 2, Title = "Avengers", ReleaseDate = new DateTime(2012, 4, 11) };
+
+                film1.ActorFilms.Add(new ActorFilm { Actor = ExistingActorsWithoutFilms[0] });
+                film2.ActorFilms.Add(new ActorFilm { Actor = ExistingActorsWithoutFilms[0] });
+                film2.ActorFilms.Add(new ActorFilm { Actor = ExistingActorsWithoutFilms[1] });
+
+                return new List<Film> { film1, film2 };
             }
         }
 
@@ -39,9 +53,20 @@ namespace FilmsWebApi.Tests
                 var actor1 = new Actor { Id = 1, FirstName = "Robert", LastName = "Downey" };
                 var actor2 = new Actor { Id = 2, FirstName = "Scarlett", LastName = "Johanson" };
 
-                actor1.ActorFilms.Add(new ActorFilm { Film = ExistingFilms[0] });
-                actor1.ActorFilms.Add(new ActorFilm { Film = ExistingFilms[1] });
-                actor2.ActorFilms.Add(new ActorFilm { Film = ExistingFilms[1] });
+                actor1.ActorFilms.Add(new ActorFilm { Film = ExistingFilmsWithoutActors[0] });
+                actor1.ActorFilms.Add(new ActorFilm { Film = ExistingFilmsWithoutActors[1] });
+                actor2.ActorFilms.Add(new ActorFilm { Film = ExistingFilmsWithoutActors[1] });
+
+                return new List<Actor> { actor1, actor2 };
+            }
+        }
+
+        public static List<Actor> ExistingActorsWithoutFilms
+        {
+            get
+            {
+                var actor1 = new Actor { Id = 1, FirstName = "Robert", LastName = "Downey" };
+                var actor2 = new Actor { Id = 2, FirstName = "Scarlett", LastName = "Johanson" };
 
                 return new List<Actor> { actor1, actor2 };
             }
@@ -156,7 +181,7 @@ namespace FilmsWebApi.Tests
             }
         }
 
-        public static IEnumerable<Film> UpdatedFIlms
+        public static IEnumerable<Film> UpdatedFilms
         {
             get
             {
