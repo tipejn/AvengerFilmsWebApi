@@ -194,5 +194,15 @@ namespace FilmsWebApi.Tests
                 return films;
             }
         }
+
+        public static IEnumerable<int> IntExtremeValues
+        {
+            get
+            {
+                yield return 0;
+                yield return int.MaxValue;
+                yield return int.MinValue;
+            }
+        }
     }
 }

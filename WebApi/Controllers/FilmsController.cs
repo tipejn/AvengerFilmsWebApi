@@ -62,7 +62,7 @@ namespace FilmsWebApi.Controllers
 
         // PUT: Films/5
         [HttpPut("{id}")]
-        public IActionResult PutActor(int id, Film film)
+        public IActionResult PutFilm(int id, Film film)
         {
             if (film is null || id != film.Id)
             {
